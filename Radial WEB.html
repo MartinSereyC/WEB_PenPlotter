@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNC Radial Pattern Generator</title>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        #previewCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #gcodeOutput {
+            flex: 1;
+            min-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CNC Radial Pattern Generator</h1>
+
+        <div class="main-container">
+        <div class="column input-column">
+            <div id="inputForm">
+                <div class="input-group">
+                    <h3>Machine Bounds</h3>
+                    <div class="input-row">
+                        <label for="min_x">Min X (mm):</label>
+                        <input type="number" id="min_x">
+                    </div>
+                    <div class="input-row">
+                        <label for="min_y">Min Y (mm):</label>
+                        <input type="number" id="min_y">
+                    </div>
+                    <div class="input-row">
+                        <label for="max_x">Max X (mm):</label>
+                        <input type="number" id="max_x">
+                    </div>
+                    <div class="input-row">
+                        <label for="max_y">Max Y (mm):</label>
+                        <input type="number" id="max_y">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <h3>Circle Parameters</h3>
+                    <div class="input-row">
+                        <label for="center_x">Center X (mm):</label>
+                        <input type="number" id="center_x">
+                    </div>
+                    <div class="input-row">
+                        <label for="center_y">Center Y (mm):</label>
+                        <input type="number" id="center_y">
+                    </div>
+                    <div class="input-row">
+                        <label for="radius">Outer Radius (mm):</label>
+                        <input type="number" id="radius">
+                    </div>
+                    <div class="input-row">
+                        <label for="inner_radius">Inner Radius (mm):</label>
+                        <input type="number" id="inner_radius">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <h3>Z Values</h3>
+                    <div class="input-row">
+                        <label for="travel_z">Travel Z (mm):</label>
+                        <input type="number" id="travel_z">
+                    </div>
+                    <div class="input-row">
+                        <label for="z1">Z Value 1 (mm):</label>
+                        <input type="number" id="z1">
+                    </div>
+                    <div class="input-row">
+                        <label for="z2">Z Value 2 (mm):</label>
+                        <input type="number" id="z2">
+                    </div>
+                    <div class="input-row">
+                        <label for="z3">Z Value 3 (mm):</label>
+                        <input type="number" id="z3">
+                    </div>
+                    <div class="input-row">
+                        <label for="z4">Z Value 4 (mm):</label>
+                        <input type="number" id="z4">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <h3>Other Parameters</h3>
+                    <div class="input-row">
+                        <label for="num_lines">Radial Lines:</label>
+                        <input type="number" id="num_lines" step="1">
+                    </div>
+                    <div class="input-row">
+                        <label for="max_points">Max Points/Radius:</label>
+                        <input type="number" id="max_points" step="1">
+                    </div>
+                    <div class="input-row">
+                        <label for="xy_feed">XY Feedrate:</label>
+                        <input type="number" id="xy_feed">
+                    </div>
+                    <div class="input-row">
+                        <label for="z_feed">Z Feedrate:</label>
+                        <input type="number" id="z_feed">
+                    </div>
+                </div>
+            </div>
+            <button id="generateButton" class="btn">Generate G-code</button>
+        </div>
+
+        <div class="column viz-column">
+            <canvas id="previewCanvas"></canvas>
+        </div>
+
+        <div class="column code-column">
+            <textarea id="gcodeOutput" readonly></textarea>
+            <button id="copyButton" class="btn">Copy to Clipboard</button>
+        </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. Get Element References ---
+            const inputs = {
+                min_x: document.getElementById('min_x'),
+                min_y: document.getElementById('min_y'),
+                max_x: document.getElementById('max_x'),
+                max_y: document.getElementById('max_y'),
+                center_x: document.getElementById('center_x'),
+                center_y: document.getElementById('center_y'),
+                radius: document.getElementById('radius'),
+                inner_radius: document.getElementById('inner_radius'),
+                travel_z: document.getElementById('travel_z'),
+                z1: document.getElementById('z1'),
+                z2: document.getElementById('z2'),
+                z3: document.getElementById('z3'),
+                z4: document.getElementById('z4'),
+                num_lines: document.getElementById('num_lines'),
+                max_points: document.getElementById('max_points'),
+                xy_feed: document.getElementById('xy_feed'),
+                z_feed: document.getElementById('z_feed'),
+            };
+            const canvas = document.getElementById('previewCanvas');
+            const ctx = canvas.getContext('2d');
+            const gcodeOutput = document.getElementById('gcodeOutput');
+            const generateButton = document.getElementById('generateButton');
+            const copyButton = document.getElementById('copyButton');
+
+            // --- 2. Default Parameters ---
+            const defaults = {
+                min_x: 50, min_y: 0,
+                max_x: 710, max_y: 790,
+                center_x: 380, center_y: 200,
+                radius: 275, inner_radius: 50,
+                travel_z: 162,
+                z1: 112, z2: 125, z3: 130, z4: 140,
+                num_lines: 30, max_points: 4,
+                xy_feed: 13000, z_feed: 2600,
+            };
+
+            // --- 3. Helper Functions (JS equivalents of Python's random) ---
+            function randint(min, max) {
+                // Return a random integer from min to max (inclusive)
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            function uniform(min, max) {
+                // Return a random float between min and max
+                return Math.random() * (max - min) + min;
+            }
+            
+            function choice(arr) {
+                // Return a random element from an array
+                return arr[Math.floor(Math.random() * arr.length)];
+            }
+
+            // --- 4. Core Logic Functions (Ported from Python) ---
+
+            function loadDefaults() {
+                for (const key in defaults) {
+                    if (inputs[key]) {
+                        inputs[key].value = defaults[key];
+                    }
+                }
+            }
+
+            function validateInputs() {
+                try {
+                    const data = {};
+                    const intKeys = ['num_lines', 'max_points'];
+                    
+                    // Parse all values
+                    for (const key in inputs) {
+                        const val = inputs[key].value;
+                        if (val === '') {
+                            throw new Error(`Input Error: "${key}" cannot be empty.`);
+                        }
+                        
+                        if (intKeys.includes(key)) {
+                            data[key] = parseInt(val, 10);
+                        } else {
+                            data[key] = parseFloat(val);
+                        }
+                        
+                        if (isNaN(data[key])) {
+                            throw new Error(`Input Error: "${key}" is not a valid number.`);
+                        }
+                    }
+
+                    // Run validation checks
+                    if (data.min_x >= data.max_x || data.min_y >= data.max_y) {
+                        throw new Error("Invalid machine bounds: Min must be less than Max.");
+                    }
+                    if (!(data.min_x <= data.center_x && data.center_x <= data.max_x)) {
+                        throw new Error("Center X out of bounds");
+                    }
+                    if (!(data.min_y <= data.center_y && data.center_y <= data.max_y)) {
+                        throw new Error("Center Y out of bounds");
+                    }
+                    if (data.inner_radius < 0) {
+                        throw new Error("Inner radius cannot be negative");
+                    }
+                    if (data.inner_radius >= data.radius) {
+                        throw new Error("Inner radius must be smaller than outer radius");
+                    }
+                    
+                    const zValues = [data.z1, data.z2, data.z3, data.z4];
+                    if (zValues.some(z => z >= data.travel_z)) {
+                        throw new Error("Z values must be below travel height");
+                    }
+
+                    return data;
+
+                } catch (e) {
+                    alert(e.message);
+                    return null;
+                }
+            }
+
+            function drawPreview(data) {
+                // Resize canvas to its display size for crisp rendering
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Proportional scaling
+                const machine_width = data.max_x - data.min_x;
+                const machine_height = data.max_y - data.min_y;
+                const x_scale = canvas.width / machine_width;
+                const y_scale = canvas.height / machine_height;
+                const scale = Math.min(x_scale, y_scale) * 0.95;
+
+                // Centering offsets
+                const draw_width = machine_width * scale;
+                const draw_height = machine_height * scale;
+                const x_offset = (canvas.width - draw_width) / 2;
+                const y_offset = (canvas.height - draw_height) / 2;
+
+                // Helper function to transform machine coords to canvas coords
+                // Note: The Y-axis is flipped to match the Python script's logic
+                function transform(x, y) {
+                    const px = x_offset + (x - data.min_x) * scale;
+                    const py = y_offset + draw_height - (y - data.min_y) * scale;
+                    return { px, py };
+                }
+
+                // Draw machine bounds
+                ctx.strokeStyle = "gray";
+                ctx.setLineDash([2, 2]);
+                ctx.strokeRect(x_offset, y_offset, draw_width, draw_height);
+                ctx.setLineDash([]); // Reset dash
+
+                // Draw center point and inner circle
+                const { px: cx, py: cy } = transform(data.center_x, data.center_y);
+                
+                // Draw inner radius circle (note: canvas arc radius is in pixels)
+                const inner_radius_px = data.inner_radius * scale;
+                ctx.beginPath();
+                ctx.arc(cx, cy, inner_radius_px, 0, 2 * Math.PI);
+                ctx.strokeStyle = "gray";
+                ctx.setLineDash([2, 2]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Draw center point
+                ctx.beginPath();
+                ctx.arc(cx, cy, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = "red";
+                ctx.fill();
+
+                // Color mapping
+                const zColors = {
+                    [data.z1]: "#FF0000",
+                    [data.z2]: "#00FF00",
+                    [data.z3]: "#0000FF",
+                    [data.z4]: "#FF00FF"
+                };
+                const zOptions = [data.z1, data.z2, data.z3, data.z4];
+                
+                // Draw points
+                for (let i = 0; i < data.num_lines; i++) {
+                    const angle = i * (360.0 / data.num_lines);
+                    const radAngle = angle * (Math.PI / 180.0);
+                    const numPoints = randint(1, data.max_points);
+                    
+                    for (let j = 0; j < numPoints; j++) {
+                        const r = uniform(data.inner_radius, data.radius);
+                        const x = data.center_x + r * Math.cos(radAngle);
+                        const y = data.center_y + r * Math.sin(radAngle);
+
+                        // Skip out-of-bounds points
+                        if (!(data.min_x <= x && x <= data.max_x && data.min_y <= y && y <= data.max_y)) {
+                            continue;
+                        }
+
+                        const { px, py } = transform(x, y);
+                        const z = choice(zOptions);
+                        
+                        ctx.beginPath();
+                        ctx.arc(px, py, 3, 0, 2 * Math.PI);
+                        ctx.fillStyle = zColors[z];
+                        ctx.strokeStyle = "black";
+                        ctx.lineWidth = 1;
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            function generateGcode(data) {
+                let gcode = [
+                    "G21 ; Set units to millimeters",
+                    "G28 ;homing",
+                    `G0 Z${data.travel_z.toFixed(3)} F${data.z_feed.toFixed(1)} ; Safe height`
+                ];
+                
+                const zOptions = [data.z1, data.z2, data.z3, data.z4];
+
+                for (let i = 0; i < data.num_lines; i++) {
+                    const angle = i * (360.0 / data.num_lines);
+                    const radAngle = angle * (Math.PI / 180.0);
+                    const numPoints = randint(1, data.max_points);
+                    
+                    let radii = [];
+                    for (let j = 0; j < numPoints; j++) {
+                        radii.push(uniform(data.inner_radius, data.radius));
+                    }
+                    // Sort radii (as in the Python script)
+                    radii.sort((a, b) => a - b);
+
+                    for (const r of radii) {
+                        const x = data.center_x + r * Math.cos(radAngle);
+                        const y = data.center_y + r * Math.sin(radAngle);
+
+                        // Skip out-of-bounds points
+                        if (!(data.min_x <= x && x <= data.max_x && data.min_y <= y && y <= data.max_y)) {
+                            continue;
+                        }
+                        
+                        // Skip points inside inner radius (redundant check, but matches Python)
+                        const distance = Math.sqrt(Math.pow(x - data.center_x, 2) + Math.pow(y - data.center_y, 2));
+                        if (distance < data.inner_radius) {
+                            continue;
+                        }
+                        
+                        const z = choice(zOptions);
+                        gcode.push(`\nG0 X${x.toFixed(3)} Y${y.toFixed(3)} F${data.xy_feed.toFixed(1)} ; Position`);
+                        gcode.push(`G1 Z${z.toFixed(3)} F${data.z_feed.toFixed(1)} ; Plunge`);
+                        gcode.push(`G0 Z${data.travel_z.toFixed(3)} ; Retract`);
+                    }
+                }
+                
+                gcode.push("G0 X10 Y 850 Z200"); // Hardcoded end position from script
+                gcode.push("\nM2 ; Program end");
+                return gcode.join("\n");
+            }
+
+            function generate() {
+                const data = validateInputs();
+                if (data) {
+                    drawPreview(data);
+                    const gcode = generateGcode(data);
+                    gcodeOutput.value = gcode;
+                }
+            }
+
+            function copyToClipboard() {
+                if (!navigator.clipboard) {
+                    // Fallback for older browsers
+                    try {
+                        gcodeOutput.select();
+                        document.execCommand('copy');
+                        alert("G-code copied to clipboard (fallback).");
+                    } catch (err) {
+                        alert("Failed to copy. Please copy manually.");
+                    }
+                    return;
+                }
+                
+                navigator.clipboard.writeText(gcodeOutput.value).then(() => {
+                    alert("G-code copied to clipboard!");
+                }, (err) => {
+                    alert("Failed to copy: " + err);
+                });
+            }
+
+            // --- 5. Attach Event Listeners ---
+            generateButton.addEventListener('click', () => {
+                requireAuth(() => generate());
+            });
+            copyButton.addEventListener('click', () => {
+                requireAuth(() => copyToClipboard());
+            });
+
+            // --- 6. Initial Setup ---
+            loadDefaults();
+            // Run generate once on load to show the default preview (only if authenticated)
+            if (typeof isAuthenticated !== 'undefined' && isAuthenticated()) {
+                generate();
+            } 
+            
+        }); // End of DOMContentLoaded
+    </script>
+</body>
+</html>

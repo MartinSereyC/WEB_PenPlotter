@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manipulador de Imagen para Ploteo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Previsualización de Imagen para Ploteo</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="imageUpload">1. Subir Imagen:</label>
+                <input type="file" id="imageUpload" accept="image/*">
+            </div>
+
+            <div class="control-group">
+                <label for="plotSize">2. Seleccionar Tamaño de Ploteo:</label>
+                <select id="plotSize">
+                    <option value="A4_portrait">A4 Vertical (210 x 297 mm)</option>
+                    <option value="A4_landscape">A4 Horizontal (297 x 210 mm)</option>
+                    <option value="A3_portrait">A3 Vertical (297 x 420 mm)</option>
+                    <option value="A3_landscape">A3 Horizontal (420 x 297 mm)</option>
+                    <option value="A2_portrait">A2 Vertical (420 x 594 mm)</option>
+                    <option value="A2_landscape">A2 Horizontal (594 x 420 mm)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>3. Ajustar Imagen:</label>
+                <div class="zoom-pan-controls">
+                    <button id="zoomIn">Zoom +</button>
+                    <button id="zoomOut">Zoom -</button>
+                    <button id="panUp">Arriba</button>
+                    <button id="panDown">Abajo</button>
+                    <button id="panLeft">Izquierda</button>
+                    <button id="panRight">Derecha</button>
+                    <button id="resetImage">Restablecer</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <button id="downloadImage">4. Descargar Imagen Ploteable</button>
+            </div>
+			
+			<div class="control-group">
+				<button id="applyFiltersBtn">5. Aplicar Filtros (SpiralBetty)</button>
+			</div>
+			
+			
+        </div>
+
+
+        <div class="canvas-container">
+            <canvas id="imageCanvas"></canvas>
+            <div class="canvas-overlay"></div> </div>
+
+        <p class="notes">
+            <strong>Notas:</strong>
+            <ul>
+                <li>La imagen se escalará para encajar inicialmente en el área de ploteo seleccionada.</li>
+                <li>Usa los controles de "Ajustar Imagen" para acercar/alejar y moverla dentro del área.</li>
+                <li>Solo el contenido dentro del cuadro blanco será visible en la imagen descargada.</li>
+            </ul>
+        </p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

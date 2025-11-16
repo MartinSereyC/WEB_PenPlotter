@@ -1,0 +1,17 @@
+{
+  "name": "web-penplotter",
+  "version": "1.0.0",
+  "description": "G-Code Generator Tools for Pen Plotter",
+  "scripts": {
+    "dev": "npx http-server -p 8000 -o",
+    "start": "npx http-server -p 8000 -o"
+  },
+  "keywords": [
+    "g-code",
+    "pen-plotter",
+    "cnc"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
