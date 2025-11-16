@@ -14,7 +14,7 @@
         }
         
         .tool-card {
-            background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-light) 100%);
+            background: var(--bg-white);
             border: 3px solid var(--primary-orange);
             border-radius: 12px;
             padding: 25px;
@@ -28,7 +28,7 @@
         .tool-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px var(--shadow);
-            border-color: var(--dark-orange);
+            border-color: var(--secondary-black);
         }
         
         .tool-card h3 {
@@ -36,7 +36,7 @@
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 1.5em;
-            border-bottom: 2px solid var(--primary-yellow);
+            border-bottom: 2px solid var(--secondary-black);
             padding-bottom: 10px;
         }
         
@@ -47,9 +47,11 @@
         }
         
         .tool-icon {
-            font-size: 3em;
+            font-size: 2em;
             text-align: center;
             margin-bottom: 15px;
+            color: var(--primary-orange);
+            font-weight: bold;
         }
         
         .header-description {
@@ -65,7 +67,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎨 G-Code Generator Tools</h1>
+        <h1>G-Code Generator Tools</h1>
         <p class="header-description">
             A collection of web-based tools for generating G-code for pen plotters and CNC machines.
             Select a tool below to get started.
@@ -73,25 +75,25 @@
         
         <div class="tools-grid">
             <a href="Imagen a puntos por capas.html" class="tool-card">
-                <div class="tool-icon">🖼️</div>
+                <div class="tool-icon">IMG</div>
                 <h3>Image to Points by Layers</h3>
                 <p>Convert images to G-code by generating points organized in brightness layers. Perfect for creating detailed point-based artwork.</p>
             </a>
             
             <a href="Manipulador de imagen.html" class="tool-card">
-                <div class="tool-icon">🎛️</div>
+                <div class="tool-icon">EDIT</div>
                 <h3>Image Manipulator</h3>
                 <p>Preview and adjust images for plotting. Scale, pan, and apply filters to prepare your images before generating G-code.</p>
             </a>
             
             <a href="Radial WEB.html" class="tool-card">
-                <div class="tool-icon">🌀</div>
+                <div class="tool-icon">RAD</div>
                 <h3>Radial Pattern Generator</h3>
                 <p>Generate radial patterns with customizable circles, lines, and Z-depth variations. Create beautiful circular designs.</p>
             </a>
             
             <a href="suncho perforacione y ramaño ajustable- WEB.html" class="tool-card">
-                <div class="tool-icon">📍</div>
+                <div class="tool-icon">PATH</div>
                 <h3>Random Path Generator</h3>
                 <p>Create random tool paths with adjustable parameters. Generate G-code for perforation patterns and custom point distributions.</p>
             </a>
