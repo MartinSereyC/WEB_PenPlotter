@@ -1,0 +1,384 @@
+/**
+ * Configuration Panel Styles
+ * Styles for the Z-safety configuration panel component
+ */
+
+/* Panel Container */
+.config-panel {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #ff6b35;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+}
+
+.config-panel--compact {
+    padding: 10px;
+}
+
+.config-panel__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+.config-panel__icon {
+    font-size: 1.5em;
+}
+
+.config-panel__title {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #ff6b35;
+}
+
+/* Selectors */
+.config-panel__selectors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.config-panel--compact .config-panel__selectors {
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.config-panel__selector {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.config-panel__selector label {
+    font-size: 0.85em;
+    color: #a0a0a0;
+    font-weight: 500;
+}
+
+.config-panel__selector select {
+    background: #2c2c2c;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: #fff;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.config-panel__selector select:hover {
+    border-color: #ff6b35;
+}
+
+.config-panel__selector select:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+}
+
+/* Safety Info */
+.config-panel__safety {
+    margin-top: 12px;
+}
+
+.config-panel__warning {
+    background: rgba(255, 193, 7, 0.15);
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 10px;
+    color: #ffc107;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.config-panel__limits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.config-panel__limit {
+    background: rgba(40, 167, 69, 0.15);
+    border: 1px solid #28a745;
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.config-panel__limit-label {
+    font-size: 0.75em;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.config-panel__limit-value {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #28a745;
+}
+
+/* Manage Button */
+.config-panel__manage-btn {
+    width: 100%;
+    margin-top: 12px;
+    background: transparent;
+    border: 1px dashed #666;
+    color: #888;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85em;
+}
+
+.config-panel__manage-btn:hover {
+    border-color: #ff6b35;
+    color: #ff6b35;
+    background: rgba(255, 107, 53, 0.1);
+}
+
+/* Modal */
+.config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.config-modal__content {
+    background: #1a1a2e;
+    border: 2px solid #ff6b35;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.config-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+.config-modal__header h2 {
+    margin: 0;
+    color: #ff6b35;
+    font-size: 1.3em;
+}
+
+.config-modal__close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 2em;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.config-modal__close:hover {
+    color: #ff6b35;
+}
+
+.config-modal__body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Tabs */
+.config-modal__tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.config-modal__tab {
+    flex: 1;
+    background: #2c2c2c;
+    border: 1px solid #444;
+    color: #888;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95em;
+}
+
+.config-modal__tab:hover {
+    border-color: #666;
+    color: #fff;
+}
+
+.config-modal__tab.active {
+    background: #ff6b35;
+    border-color: #ff6b35;
+    color: #fff;
+}
+
+/* Profile List */
+.config-modal__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.config-modal__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #2c2c2c;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.config-modal__item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.config-modal__item-info strong {
+    color: #fff;
+}
+
+.config-modal__item-info span {
+    font-size: 0.85em;
+    color: #888;
+}
+
+.config-modal__item-info small {
+    font-size: 0.75em;
+    color: #666;
+    font-style: italic;
+}
+
+.config-modal__delete-btn {
+    background: #dc3545;
+    border: none;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background 0.2s;
+}
+
+.config-modal__delete-btn:hover {
+    background: #c82333;
+}
+
+/* Add Form */
+.config-modal__form {
+    background: rgba(255, 107, 53, 0.05);
+    border: 1px dashed rgba(255, 107, 53, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.config-modal__form h4 {
+    margin: 0 0 12px 0;
+    color: #ff6b35;
+    font-size: 0.95em;
+}
+
+.config-modal__form input {
+    width: 100%;
+    background: #2c2c2c;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 10px;
+    color: #fff;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+.config-modal__form input:focus {
+    outline: none;
+    border-color: #ff6b35;
+}
+
+.config-modal__form input::placeholder {
+    color: #666;
+}
+
+.config-modal__form button {
+    width: 100%;
+    background: #ff6b35;
+    border: none;
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+    margin-top: 4px;
+}
+
+.config-modal__form button:hover {
+    background: #e55a2b;
+}
+
+/* Z-Safety Warning Banner (for use in tool pages) */
+.z-safety-warning {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(255, 193, 7, 0.2) 100%);
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.z-safety-warning__icon {
+    font-size: 1.5em;
+}
+
+.z-safety-warning__text {
+    flex: 1;
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.z-safety-warning--hidden {
+    display: none;
+}
+
+/* Z-Safety Success Indicator */
+.z-safety-ok {
+    background: rgba(40, 167, 69, 0.15);
+    border: 1px solid #28a745;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #28a745;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}

@@ -1,146 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CNC Radial Pattern Generator</title>
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="config-panel.css">
+    <link rel="stylesheet" type="text/css" href="app-header.css">
     <style>
         body {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             padding: 10px;
         }
-        
+
         .container {
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 0;
         }
-        
+
         #previewCanvas {
             width: 100%;
             height: 100%;
         }
-        
+
         #gcodeOutput {
             flex: 1;
             min-height: 300px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>CNC Radial Pattern Generator</h1>
 
         <div class="main-container">
-        <div class="column input-column">
-            <div id="inputForm">
-                <div class="input-group">
-                    <h3>Machine Bounds</h3>
-                    <div class="input-row">
-                        <label for="min_x">Min X (mm):</label>
-                        <input type="number" id="min_x">
+            <div class="column input-column">
+                <div id="inputForm">
+                    <div class="input-group">
+                        <h3>Machine Bounds</h3>
+                        <div class="input-row">
+                            <label for="min_x">Min X (mm):</label>
+                            <input type="number" id="min_x">
+                        </div>
+                        <div class="input-row">
+                            <label for="min_y">Min Y (mm):</label>
+                            <input type="number" id="min_y">
+                        </div>
+                        <div class="input-row">
+                            <label for="max_x">Max X (mm):</label>
+                            <input type="number" id="max_x">
+                        </div>
+                        <div class="input-row">
+                            <label for="max_y">Max Y (mm):</label>
+                            <input type="number" id="max_y">
+                        </div>
                     </div>
-                    <div class="input-row">
-                        <label for="min_y">Min Y (mm):</label>
-                        <input type="number" id="min_y">
-                    </div>
-                    <div class="input-row">
-                        <label for="max_x">Max X (mm):</label>
-                        <input type="number" id="max_x">
-                    </div>
-                    <div class="input-row">
-                        <label for="max_y">Max Y (mm):</label>
-                        <input type="number" id="max_y">
-                    </div>
-                </div>
 
-                <div class="input-group">
-                    <h3>Circle Parameters</h3>
-                    <div class="input-row">
-                        <label for="center_x">Center X (mm):</label>
-                        <input type="number" id="center_x">
+                    <div class="input-group">
+                        <h3>Circle Parameters</h3>
+                        <div class="input-row">
+                            <label for="center_x">Center X (mm):</label>
+                            <input type="number" id="center_x">
+                        </div>
+                        <div class="input-row">
+                            <label for="center_y">Center Y (mm):</label>
+                            <input type="number" id="center_y">
+                        </div>
+                        <div class="input-row">
+                            <label for="radius">Outer Radius (mm):</label>
+                            <input type="number" id="radius">
+                        </div>
+                        <div class="input-row">
+                            <label for="inner_radius">Inner Radius (mm):</label>
+                            <input type="number" id="inner_radius">
+                        </div>
                     </div>
-                    <div class="input-row">
-                        <label for="center_y">Center Y (mm):</label>
-                        <input type="number" id="center_y">
-                    </div>
-                    <div class="input-row">
-                        <label for="radius">Outer Radius (mm):</label>
-                        <input type="number" id="radius">
-                    </div>
-                    <div class="input-row">
-                        <label for="inner_radius">Inner Radius (mm):</label>
-                        <input type="number" id="inner_radius">
-                    </div>
-                </div>
 
-                <div class="input-group">
-                    <h3>Z Values</h3>
-                    <div class="input-row">
-                        <label for="travel_z">Travel Z (mm):</label>
-                        <input type="number" id="travel_z">
-                    </div>
-                    <div class="input-row">
-                        <label for="z1">Z Value 1 (mm):</label>
-                        <input type="number" id="z1">
-                    </div>
-                    <div class="input-row">
-                        <label for="z2">Z Value 2 (mm):</label>
-                        <input type="number" id="z2">
-                    </div>
-                    <div class="input-row">
-                        <label for="z3">Z Value 3 (mm):</label>
-                        <input type="number" id="z3">
-                    </div>
-                    <div class="input-row">
-                        <label for="z4">Z Value 4 (mm):</label>
-                        <input type="number" id="z4">
-                    </div>
-                </div>
 
-                <div class="input-group">
-                    <h3>Other Parameters</h3>
-                    <div class="input-row">
-                        <label for="num_lines">Radial Lines:</label>
-                        <input type="number" id="num_lines" step="1">
+                    <div class="input-group">
+                        <h3>Z Values</h3>
+                        <div class="input-row">
+                            <label for="travel_z">Travel Z (mm):</label>
+                            <input type="number" id="travel_z">
+                        </div>
+                        <div class="input-row">
+                            <label for="z1">Z Value 1 (mm):</label>
+                            <input type="number" id="z1">
+                        </div>
+                        <div class="input-row">
+                            <label for="z2">Z Value 2 (mm):</label>
+                            <input type="number" id="z2">
+                        </div>
+                        <div class="input-row">
+                            <label for="z3">Z Value 3 (mm):</label>
+                            <input type="number" id="z3">
+                        </div>
+                        <div class="input-row">
+                            <label for="z4">Z Value 4 (mm):</label>
+                            <input type="number" id="z4">
+                        </div>
                     </div>
-                    <div class="input-row">
-                        <label for="max_points">Max Points/Radius:</label>
-                        <input type="number" id="max_points" step="1">
-                    </div>
-                    <div class="input-row">
-                        <label for="xy_feed">XY Feedrate:</label>
-                        <input type="number" id="xy_feed">
-                    </div>
-                    <div class="input-row">
-                        <label for="z_feed">Z Feedrate:</label>
-                        <input type="number" id="z_feed">
+
+                    <div class="input-group">
+                        <h3>Other Parameters</h3>
+                        <div class="input-row">
+                            <label for="num_lines">Radial Lines:</label>
+                            <input type="number" id="num_lines" step="1">
+                        </div>
+                        <div class="input-row">
+                            <label for="max_points">Max Points/Radius:</label>
+                            <input type="number" id="max_points" step="1">
+                        </div>
+                        <div class="input-row">
+                            <label for="xy_feed">XY Feedrate:</label>
+                            <input type="number" id="xy_feed">
+                        </div>
+                        <div class="input-row">
+                            <label for="z_feed">Z Feedrate:</label>
+                            <input type="number" id="z_feed">
+                        </div>
                     </div>
                 </div>
+                <button id="generateButton" class="btn">Generate G-code</button>
             </div>
-            <button id="generateButton" class="btn">Generate G-code</button>
-        </div>
 
-        <div class="column viz-column">
-            <canvas id="previewCanvas"></canvas>
-        </div>
+            <div class="column viz-column">
+                <canvas id="previewCanvas"></canvas>
+            </div>
 
-        <div class="column code-column">
-            <textarea id="gcodeOutput" readonly></textarea>
-            <button id="copyButton" class="btn">Copy to Clipboard</button>
-        </div>
+            <div class="column code-column">
+                <textarea id="gcodeOutput" readonly></textarea>
+                <button id="copyButton" class="btn">Copy to Clipboard</button>
+            </div>
         </div>
     </div>
-
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="auth.js"></script>
 
     <script>
         // Wait for the DOM to be fully loaded
@@ -194,7 +193,7 @@
                 // Return a random float between min and max
                 return Math.random() * (max - min) + min;
             }
-            
+
             function choice(arr) {
                 // Return a random element from an array
                 return arr[Math.floor(Math.random() * arr.length)];
@@ -203,10 +202,55 @@
             // --- 4. Core Logic Functions (Ported from Python) ---
 
             function loadDefaults() {
+                const configX = machineConfig.getWorkingX();
+                const configY = machineConfig.getWorkingY();
+
                 for (const key in defaults) {
                     if (inputs[key]) {
                         inputs[key].value = defaults[key];
                     }
+                }
+
+                // Override with global config for machine bounds
+                if (inputs.max_x) inputs.max_x.value = configX;
+                if (inputs.max_y) inputs.max_y.value = configY;
+            }
+
+            // Sync with global machine config changes
+            if (typeof machineConfig !== 'undefined') {
+                machineConfig.addListener((config) => {
+                    let changed = false;
+                    if (inputs.max_x && inputs.max_x !== document.activeElement) {
+                        inputs.max_x.value = config.workingX;
+                        changed = true;
+                    }
+                    if (inputs.max_y && inputs.max_y !== document.activeElement) {
+                        inputs.max_y.value = config.workingY;
+                        changed = true;
+                    }
+                    if (changed) {
+                        // Recalculate center based on new dimensions (if using defaults)
+                        // Or just update them proportionally? For now, let's recenter
+                        inputs.center_x.value = Math.round(config.workingX / 2);
+                        inputs.center_y.value = Math.round(config.workingY / 2);
+                        // Adjust radius to fit
+                        const minDim = Math.min(config.workingX, config.workingY);
+                        inputs.radius.value = Math.round(minDim / 3);
+                    }
+                    // Regenerate if everything is valid
+                    generate();
+                });
+
+                // REVERSE SYNC: Update global config when local inputs change
+                if (inputs.max_x) {
+                    inputs.max_x.addEventListener('change', () => {
+                        machineConfig.setWorkingX(inputs.max_x.value);
+                    });
+                }
+                if (inputs.max_y) {
+                    inputs.max_y.addEventListener('change', () => {
+                        machineConfig.setWorkingY(inputs.max_y.value);
+                    });
                 }
             }
 
@@ -214,20 +258,20 @@
                 try {
                     const data = {};
                     const intKeys = ['num_lines', 'max_points'];
-                    
+
                     // Parse all values
                     for (const key in inputs) {
                         const val = inputs[key].value;
                         if (val === '') {
                             throw new Error(`Input Error: "${key}" cannot be empty.`);
                         }
-                        
+
                         if (intKeys.includes(key)) {
                             data[key] = parseInt(val, 10);
                         } else {
                             data[key] = parseFloat(val);
                         }
-                        
+
                         if (isNaN(data[key])) {
                             throw new Error(`Input Error: "${key}" is not a valid number.`);
                         }
@@ -249,10 +293,42 @@
                     if (data.inner_radius >= data.radius) {
                         throw new Error("Inner radius must be smaller than outer radius");
                     }
-                    
+
                     const zValues = [data.z1, data.z2, data.z3, data.z4];
                     if (zValues.some(z => z >= data.travel_z)) {
                         throw new Error("Z values must be below travel height");
+                    }
+
+                    // Z-Safety validation using machineConfig
+                    if (typeof machineConfig !== 'undefined') {
+                        const safetyResult = machineConfig.validateAllZ({
+                            working: zValues,
+                            travel: [data.travel_z]
+                        });
+
+                        const warningEl = document.getElementById('z-safety-warning');
+                        const warningText = document.getElementById('z-safety-warning-text');
+
+                        if (!safetyResult.allSafe) {
+                            if (warningEl && warningText) {
+                                warningEl.classList.remove('z-safety-warning--hidden');
+                                warningText.textContent = safetyResult.errors[0];
+                            }
+
+                            // Ask user to confirm unsafe operation
+                            const proceed = confirm(
+                                'Z-SAFETY WARNING!\n\n' +
+                                safetyResult.errors.join('\n') +
+                                '\n\nDo you want to proceed anyway? This could damage your machine, tool, or support surface!'
+                            );
+                            if (!proceed) {
+                                return null;
+                            }
+                        } else {
+                            if (warningEl) {
+                                warningEl.classList.add('z-safety-warning--hidden');
+                            }
+                        }
                     }
 
                     return data;
@@ -269,7 +345,7 @@
                 canvas.height = canvas.clientHeight;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
+
                 // Proportional scaling
                 const machine_width = data.max_x - data.min_x;
                 const machine_height = data.max_y - data.min_y;
@@ -299,7 +375,7 @@
 
                 // Draw center point and inner circle
                 const { px: cx, py: cy } = transform(data.center_x, data.center_y);
-                
+
                 // Draw inner radius circle (note: canvas arc radius is in pixels)
                 const inner_radius_px = data.inner_radius * scale;
                 ctx.beginPath();
@@ -323,13 +399,13 @@
                     [data.z4]: "#FF00FF"
                 };
                 const zOptions = [data.z1, data.z2, data.z3, data.z4];
-                
+
                 // Draw points
                 for (let i = 0; i < data.num_lines; i++) {
                     const angle = i * (360.0 / data.num_lines);
                     const radAngle = angle * (Math.PI / 180.0);
                     const numPoints = randint(1, data.max_points);
-                    
+
                     for (let j = 0; j < numPoints; j++) {
                         const r = uniform(data.inner_radius, data.radius);
                         const x = data.center_x + r * Math.cos(radAngle);
@@ -342,7 +418,7 @@
 
                         const { px, py } = transform(x, y);
                         const z = choice(zOptions);
-                        
+
                         ctx.beginPath();
                         ctx.arc(px, py, 3, 0, 2 * Math.PI);
                         ctx.fillStyle = zColors[z];
@@ -360,14 +436,14 @@
                     "G28 ;homing",
                     `G0 Z${data.travel_z.toFixed(3)} F${data.z_feed.toFixed(1)} ; Safe height`
                 ];
-                
+
                 const zOptions = [data.z1, data.z2, data.z3, data.z4];
 
                 for (let i = 0; i < data.num_lines; i++) {
                     const angle = i * (360.0 / data.num_lines);
                     const radAngle = angle * (Math.PI / 180.0);
                     const numPoints = randint(1, data.max_points);
-                    
+
                     let radii = [];
                     for (let j = 0; j < numPoints; j++) {
                         radii.push(uniform(data.inner_radius, data.radius));
@@ -383,20 +459,20 @@
                         if (!(data.min_x <= x && x <= data.max_x && data.min_y <= y && y <= data.max_y)) {
                             continue;
                         }
-                        
+
                         // Skip points inside inner radius (redundant check, but matches Python)
                         const distance = Math.sqrt(Math.pow(x - data.center_x, 2) + Math.pow(y - data.center_y, 2));
                         if (distance < data.inner_radius) {
                             continue;
                         }
-                        
+
                         const z = choice(zOptions);
                         gcode.push(`\nG0 X${x.toFixed(3)} Y${y.toFixed(3)} F${data.xy_feed.toFixed(1)} ; Position`);
                         gcode.push(`G1 Z${z.toFixed(3)} F${data.z_feed.toFixed(1)} ; Plunge`);
                         gcode.push(`G0 Z${data.travel_z.toFixed(3)} ; Retract`);
                     }
                 }
-                
+
                 gcode.push("G0 X10 Y 850 Z200"); // Hardcoded end position from script
                 gcode.push("\nM2 ; Program end");
                 return gcode.join("\n");
@@ -423,7 +499,7 @@
                     }
                     return;
                 }
-                
+
                 navigator.clipboard.writeText(gcodeOutput.value).then(() => {
                     alert("G-code copied to clipboard!");
                 }, (err) => {
@@ -432,21 +508,21 @@
             }
 
             // --- 5. Attach Event Listeners ---
-            generateButton.addEventListener('click', () => {
-                requireAuth(() => generate());
-            });
-            copyButton.addEventListener('click', () => {
-                requireAuth(() => copyToClipboard());
-            });
+            generateButton.addEventListener('click', () => generate());
+            copyButton.addEventListener('click', () => copyToClipboard());
 
             // --- 6. Initial Setup ---
             loadDefaults();
-            // Run generate once on load to show the default preview (only if authenticated)
-            if (typeof isAuthenticated !== 'undefined' && isAuthenticated()) {
-                generate();
-            } 
-            
+            // Run generate once on load to show the default preview
+            generate();
+
         }); // End of DOMContentLoaded
     </script>
+
+    <!-- Scripts -->
+    <script src="machine-config.js"></script>
+    <script src="config-panel.js"></script>
+    <script src="app-header.js?v=2"></script>
 </body>
+
 </html>

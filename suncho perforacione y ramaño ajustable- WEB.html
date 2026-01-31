@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CNC Random Path Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="config-panel.css">
+    <link rel="stylesheet" type="text/css" href="app-header.css">
     <style>
         .main-content {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
         }
+
         .controls {
             flex: 1;
             min-width: 250px;
             max-width: 300px;
         }
+
         .visualization {
             flex: 3;
             min-width: 600px;
         }
+
         #gcodeOutput {
             width: 100%;
             min-height: 180px;
         }
+
         #chartContainer {
             width: 750px;
             height: 870px;
@@ -34,127 +39,130 @@
             transform-origin: 0 0;
             margin: 20px 0;
         }
+
         #pathChart {
             width: 100% !important;
             height: 100% !important;
             aspect-ratio: 750/870;
         }
+
         .form-group {
             margin-bottom: 10px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>CNC Random Path Generator</h1>
-        
+
         <div class="main-content" style="display: flex; flex-wrap: wrap; gap: 15px;">
-        <div class="controls">
-            <!-- Generate button at the top -->
-            <button id="generateBtn" style="margin-bottom: 15px;">Generate G-Code</button>
-            
-            <!-- Presets menu -->
-            <div class="presets-menu">
-                <h3>Presets</h3>
-                <div class="form-group">
-                    <label for="presetName">Preset Name:</label>
-                    <input type="text" id="presetName" placeholder="My Config">
+            <div class="controls">
+                <!-- Generate button at the top -->
+                <button id="generateBtn" style="margin-bottom: 15px;">Generate G-Code</button>
+
+                <!-- Presets menu -->
+                <div class="presets-menu">
+                    <h3>Presets</h3>
+                    <div class="form-group">
+                        <label for="presetName">Preset Name:</label>
+                        <input type="text" id="presetName" placeholder="My Config">
+                    </div>
+                    <button id="savePresetBtn">Save Current Settings</button>
+                    <button id="clearPresetsBtn">Clear All</button>
+                    <div class="preset-buttons" id="presetButtons"></div>
                 </div>
-                <button id="savePresetBtn">Save Current Settings</button>
-                <button id="clearPresetsBtn">Clear All</button>
-                <div class="preset-buttons" id="presetButtons"></div>
+
+                <!-- Input controls - more compact layout -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label for="xMin">X Min (mm):</label>
+                        <input type="number" id="xMin" value="50" min="0" max="750">
+                    </div>
+                    <div class="form-group">
+                        <label for="xMax">X Max (mm):</label>
+                        <input type="number" id="xMax" value="700" min="0" max="750">
+                    </div>
+                    <div class="form-group">
+                        <label for="yMin">Y Min (mm):</label>
+                        <input type="number" id="yMin" value="50" min="0" max="870">
+                    </div>
+                    <div class="form-group">
+                        <label for="yMax">Y Max (mm):</label>
+                        <input type="number" id="yMax" value="800" min="0" max="870">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div class="form-group">
+                        <label for="xFeedRate">X Feed (mm/min):</label>
+                        <input type="number" id="xFeedRate" value="13000">
+                    </div>
+                    <div class="form-group">
+                        <label for="yFeedRate">Y Feed (mm/min):</label>
+                        <input type="number" id="yFeedRate" value="13000">
+                    </div>
+                    <div class="form-group">
+                        <label for="zFeedRate">Z Feed (mm/min):</label>
+                        <input type="number" id="zFeedRate" value="2600">
+                    </div>
+                    <div class="form-group">
+                        <label for="pointCount">Points:</label>
+                        <input type="number" id="pointCount" value="20" min="1" max="1000">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div class="form-group">
+                        <label for="zValue1">Z1 (mm):</label>
+                        <input type="number" id="zValue1" value="137" min="0" max="207">
+                    </div>
+                    <div class="form-group">
+                        <label for="zValue2">Z2 (mm):</label>
+                        <input type="number" id="zValue2" value="127" min="0" max="207">
+                    </div>
+                    <div class="form-group">
+                        <label for="zValue3">Z3 (mm):</label>
+                        <input type="number" id="zValue3" value="117" min="0" max="207">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px;">
+                    <label for="zTravelHeight">Z Travel (mm):</label>
+                    <input type="number" id="zTravelHeight" value="150" min="0" max="207">
+                </div>
+
+                <div class="workarea-info">
+                    <h3>Machine Limits:</h3>
+                    <p>X: 0-750mm, Y: 0-870mm, Z: 0-207mm</p>
+                </div>
             </div>
-            
-            <!-- Input controls - more compact layout -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group">
-                    <label for="xMin">X Min (mm):</label>
-                    <input type="number" id="xMin" value="50" min="0" max="750">
+
+            <div class="visualization">
+                <h2>Tool Path Visualization (1:1.16 proportion, 750×870mm)</h2>
+                <div id="chartContainer">
+                    <canvas id="pathChart"></canvas>
                 </div>
-                <div class="form-group">
-                    <label for="xMax">X Max (mm):</label>
-                    <input type="number" id="xMax" value="700" min="0" max="750">
-                </div>
-                <div class="form-group">
-                    <label for="yMin">Y Min (mm):</label>
-                    <input type="number" id="yMin" value="50" min="0" max="870">
-                </div>
-                <div class="form-group">
-                    <label for="yMax">Y Max (mm):</label>
-                    <input type="number" id="yMax" value="800" min="0" max="870">
+
+                <h2>Generated G-Code</h2>
+                <textarea id="gcodeOutput" readonly></textarea>
+
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="copyBtn">Copy G-Code</button>
+                    <button id="downloadBtn">Download G-Code</button>
                 </div>
             </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                <div class="form-group">
-                    <label for="xFeedRate">X Feed (mm/min):</label>
-                    <input type="number" id="xFeedRate" value="13000">
-                </div>
-                <div class="form-group">
-                    <label for="yFeedRate">Y Feed (mm/min):</label>
-                    <input type="number" id="yFeedRate" value="13000">
-                </div>
-                <div class="form-group">
-                    <label for="zFeedRate">Z Feed (mm/min):</label>
-                    <input type="number" id="zFeedRate" value="2600">
-                </div>
-                <div class="form-group">
-                    <label for="pointCount">Points:</label>
-                    <input type="number" id="pointCount" value="20" min="1" max="1000">
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
-                <div class="form-group">
-                    <label for="zValue1">Z1 (mm):</label>
-                    <input type="number" id="zValue1" value="137" min="0" max="207">
-                </div>
-                <div class="form-group">
-                    <label for="zValue2">Z2 (mm):</label>
-                    <input type="number" id="zValue2" value="127" min="0" max="207">
-                </div>
-                <div class="form-group">
-                    <label for="zValue3">Z3 (mm):</label>
-                    <input type="number" id="zValue3" value="117" min="0" max="207">
-                </div>
-            </div>
-            
-            <div class="form-group" style="margin-top: 10px;">
-                <label for="zTravelHeight">Z Travel (mm):</label>
-                <input type="number" id="zTravelHeight" value="150" min="0" max="207">
-            </div>
-            
-            <div class="workarea-info">
-                <h3>Machine Limits:</h3>
-                <p>X: 0-750mm, Y: 0-870mm, Z: 0-207mm</p>
-            </div>
-        </div>
-        
-        <div class="visualization">
-            <h2>Tool Path Visualization (1:1.16 proportion, 750×870mm)</h2>
-            <div id="chartContainer">
-                <canvas id="pathChart"></canvas>
-            </div>
-            
-            <h2>Generated G-Code</h2>
-            <textarea id="gcodeOutput" readonly></textarea>
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="copyBtn">Copy G-Code</button>
-                <button id="downloadBtn">Download G-Code</button>
-            </div>
-        </div>
         </div>
     </div>
 
     <script>
         // Initialize chart
         const ctx = document.getElementById('pathChart').getContext('2d');
-		
-		const chartCanvas = document.getElementById('pathChart');
+
+        const chartCanvas = document.getElementById('pathChart');
         chartCanvas.width = 750;  // X axis 750mm
         chartCanvas.height = 870; // Y axis 870mm
-		
+
         let pathChart = new Chart(ctx, {
             type: 'scatter',
             data: {
@@ -187,7 +195,7 @@
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 return `X: ${context.parsed.x.toFixed(2)}mm, Y: ${context.parsed.y.toFixed(2)}mm`;
                             }
                         }
@@ -203,7 +211,7 @@
                 alert('Please enter a name for your preset');
                 return;
             }
-            
+
             const preset = {
                 name: presetName,
                 xMin: document.getElementById('xMin').value,
@@ -219,16 +227,16 @@
                 zValue3: document.getElementById('zValue3').value,
                 zTravelHeight: document.getElementById('zTravelHeight').value
             };
-            
+
             let presets = JSON.parse(localStorage.getItem('cncPresets') || '[]');
             presets = presets.filter(p => p.name !== presetName);
             presets.push(preset);
             localStorage.setItem('cncPresets', JSON.stringify(presets));
-            
+
             updatePresetButtons();
             document.getElementById('presetName').value = '';
         }
-        
+
         // Function to load a preset
         function loadPreset(preset) {
             document.getElementById('xMin').value = preset.xMin;
@@ -243,28 +251,28 @@
             document.getElementById('zValue2').value = preset.zValue2;
             document.getElementById('zValue3').value = preset.zValue3;
             document.getElementById('zTravelHeight').value = preset.zTravelHeight;
-            
+
             generateGCode();
         }
-        
+
         // Function to show all saved presets as buttons
         function updatePresetButtons() {
             const presets = JSON.parse(localStorage.getItem('cncPresets') || []);
             const container = document.getElementById('presetButtons');
             container.innerHTML = '';
-            
+
             if (presets.length === 0) {
                 container.innerHTML = '<p>No presets saved</p>';
                 return;
             }
-            
+
             presets.forEach(preset => {
                 const btn = document.createElement('button');
                 btn.className = 'preset-btn';
                 btn.textContent = preset.name;
                 btn.onclick = () => loadPreset(preset);
                 container.appendChild(btn);
-                
+
                 const delBtn = document.createElement('button');
                 delBtn.className = 'preset-btn';
                 delBtn.textContent = '×';
@@ -280,7 +288,7 @@
                 container.appendChild(delBtn);
             });
         }
-        
+
         // Function to clear all presets
         function clearPresets() {
             if (confirm('Delete ALL saved presets?')) {
@@ -288,7 +296,7 @@
                 updatePresetButtons();
             }
         }
-        
+
         // Function to copy G-code to clipboard
         function copyGCode() {
             const gcodeOutput = document.getElementById('gcodeOutput');
@@ -296,7 +304,7 @@
             document.execCommand('copy');
             alert('G-Code copied to clipboard!');
         }
-        
+
         // Function to download G-code as file
         function downloadGCode() {
             const gcode = document.getElementById('gcodeOutput').value;
@@ -304,7 +312,7 @@
                 alert('No G-Code to download. Generate G-Code first.');
                 return;
             }
-            
+
             const blob = new Blob([gcode], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -315,7 +323,7 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
-        
+
         // Main function to generate G-code
         function generateGCode() {
             // Get all input values
@@ -331,33 +339,65 @@
             const zValue2 = parseFloat(document.getElementById('zValue2').value) || 100;
             const zValue3 = parseFloat(document.getElementById('zValue3').value) || 150;
             const zTravelHeight = parseFloat(document.getElementById('zTravelHeight').value) || 200;
-            
+
             // Validate inputs
             if (xMin >= xMax || yMin >= yMax) {
                 alert('Minimum values must be less than maximum values');
                 return;
             }
-            
+
             if (xMin < 0 || xMax > 750 || yMin < 0 || yMax > 870) {
                 alert('X must be 0-750mm and Y must be 0-870mm');
                 return;
             }
-            
+
+            // Z-Safety validation using machineConfig
+            const zValues = [zValue1, zValue2, zValue3];
+            if (typeof machineConfig !== 'undefined') {
+                const safetyResult = machineConfig.validateAllZ({
+                    working: zValues,
+                    travel: [zTravelHeight]
+                });
+
+                const warningEl = document.getElementById('z-safety-warning');
+                const warningText = document.getElementById('z-safety-warning-text');
+
+                if (!safetyResult.allSafe) {
+                    if (warningEl && warningText) {
+                        warningEl.classList.remove('z-safety-warning--hidden');
+                        warningText.textContent = safetyResult.errors[0];
+                    }
+
+                    // Ask user to confirm unsafe operation
+                    const proceed = confirm(
+                        'Z-SAFETY WARNING!\n\n' +
+                        safetyResult.errors.join('\n') +
+                        '\n\nDo you want to proceed anyway? This could damage your machine, tool, or support surface!'
+                    );
+                    if (!proceed) {
+                        return;
+                    }
+                } else {
+                    if (warningEl) {
+                        warningEl.classList.add('z-safety-warning--hidden');
+                    }
+                }
+            }
+
             // Generate random points
             const points = [];
-            const zValues = [zValue1, zValue2, zValue3];
-            
+
             for (let i = 0; i < pointCount; i++) {
                 const x = Math.random() * (xMax - xMin) + xMin;
                 const y = Math.random() * (yMax - yMin) + yMin;
                 const z = zValues[Math.floor(Math.random() * zValues.length)];
                 points.push({ x, y, z });
             }
-            
+
             // Update chart
             pathChart.data.datasets[0].data = points.map(p => ({ x: p.x, y: p.y }));
             pathChart.update();
-            
+
             // Generate G-Code
             let gcode = "; CNC Random Path G-Code\n";
             gcode += "; Generated by CNC Path Generator\n";
@@ -365,14 +405,14 @@
             gcode += `; Y range: ${yMin} to ${yMax} mm\n`;
             gcode += `; Z values: ${zValue1}, ${zValue2}, ${zValue3} mm\n`;
             gcode += `; Points: ${pointCount}\n\n`;
-            
+
             gcode += "G28 ; Return to home position\n";
             gcode += "G21 ; Millimeter units\n";
             gcode += "G17 ; XY plane selection\n\n";
-            
+
             // Start position
             gcode += `G0 X${xMin.toFixed(2)} Y${yMin.toFixed(2)} Z${zTravelHeight.toFixed(2)} ; Move to start position\n`;
-            
+
             // Generate movements with Z feedrate
             points.forEach((point, index) => {
                 gcode += `\n; Point ${index + 1}\n`;
@@ -380,36 +420,58 @@
                 gcode += `G1 Z${point.z.toFixed(2)} F${zFeedRate} ; Move to Z depth\n`;
                 gcode += `G0 Z${zTravelHeight.toFixed(2)} ; Retract\n`;
             });
-            
+
             // Final movement
             gcode += "\n; Final movement\n";
             gcode += `G0 X10 Y850 Z200 ; Move to end position\n`;
             gcode += "M30 ; Program end\n";
-            
+
             // Output G-Code
             document.getElementById('gcodeOutput').value = gcode;
         }
-        
+
         // Set up button click events
-        document.getElementById('generateBtn').addEventListener('click', () => {
-            requireAuth(() => generateGCode());
-        });
+        document.getElementById('generateBtn').addEventListener('click', () => generateGCode());
         document.getElementById('savePresetBtn').addEventListener('click', savePreset);
         document.getElementById('clearPresetsBtn').addEventListener('click', clearPresets);
-        document.getElementById('copyBtn').addEventListener('click', () => {
-            requireAuth(() => copyGCode());
-        });
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            requireAuth(() => downloadGCode());
-        });
-        
+        document.getElementById('copyBtn').addEventListener('click', () => copyGCode());
+        document.getElementById('downloadBtn').addEventListener('click', () => downloadGCode());
+
+        // Sync with global machine config
+        if (typeof machineConfig !== 'undefined') {
+            const syncInputs = () => {
+                const xMaxInput = document.getElementById('xMax');
+                const yMaxInput = document.getElementById('yMax');
+                if (xMaxInput && xMaxInput !== document.activeElement) {
+                    xMaxInput.value = machineConfig.getWorkingX();
+                }
+                if (yMaxInput && yMaxInput !== document.activeElement) {
+                    yMaxInput.value = machineConfig.getWorkingY();
+                }
+                generateGCode();
+            };
+
+            machineConfig.addListener(syncInputs);
+            // Initial sync
+            syncInputs();
+
+            // REVERSE SYNC
+            document.getElementById('xMax')?.addEventListener('change', (e) => {
+                machineConfig.setWorkingX(e.target.value);
+            });
+            document.getElementById('yMax')?.addEventListener('change', (e) => {
+                machineConfig.setWorkingY(e.target.value);
+            });
+        }
+
         // Load any saved presets when page loads
         updatePresetButtons();
-        // Don't generate initial G-code automatically - user must authenticate first
     </script>
-    
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="auth.js"></script>
+
+    <!-- Scripts -->
+    <script src="machine-config.js"></script>
+    <script src="config-panel.js"></script>
+    <script src="app-header.js?v=2"></script>
 </body>
+
 </html>

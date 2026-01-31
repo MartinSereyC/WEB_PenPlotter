@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manipulador de Imagen para Ploteo</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="config-panel.css">
+    <link rel="stylesheet" href="app-header.css">
 </head>
+
 <body>
     <div class="container">
         <h1>Previsualización de Imagen para Ploteo</h1>
@@ -44,29 +48,34 @@
             <div class="control-group">
                 <button id="downloadImage">4. Descargar Imagen Ploteable</button>
             </div>
-			
-			<div class="control-group">
-				<button id="applyFiltersBtn">5. Aplicar Filtros (SpiralBetty)</button>
-			</div>
-			
-			
+
+            <div class="control-group">
+                <button id="applyFiltersBtn">5. Aplicar Filtros (SpiralBetty)</button>
+            </div>
+
+
         </div>
 
 
         <div class="canvas-container">
             <canvas id="imageCanvas"></canvas>
-            <div class="canvas-overlay"></div> </div>
+            <div class="canvas-overlay"></div>
+        </div>
 
         <p class="notes">
             <strong>Notas:</strong>
-            <ul>
-                <li>La imagen se escalará para encajar inicialmente en el área de ploteo seleccionada.</li>
-                <li>Usa los controles de "Ajustar Imagen" para acercar/alejar y moverla dentro del área.</li>
-                <li>Solo el contenido dentro del cuadro blanco será visible en la imagen descargada.</li>
-            </ul>
+        <ul>
+            <li>La imagen se escalará para encajar inicialmente en el área de ploteo seleccionada.</li>
+            <li>Usa los controles de "Ajustar Imagen" para acercar/alejar y moverla dentro del área.</li>
+            <li>Solo el contenido dentro del cuadro blanco será visible en la imagen descargada.</li>
+        </ul>
         </p>
     </div>
 
+    <script src="machine-config.js"></script>
+    <script src="config-panel.js"></script>
+    <script src="app-header.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>

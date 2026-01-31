@@ -407,3 +407,4 @@ function applySpiralBettyFilter() {
     filteredImage.src = tempCanvas.toDataURL();
 }
 
+
