@@ -8,6 +8,7 @@ class AppHeader {
         // Navigation items
         this.navItems = [
             { id: 'home', name: 'Home', href: 'index.html', icon: '🏠' },
+            { id: 'manipulator', name: 'Manipulador de imagen', href: 'Manipulador de imagen.html', icon: '🎨' },
             { id: 'image-points', name: 'Image to Points', href: 'Imagen a puntos por capas.html', icon: '🖼️' },
             { id: 'radial', name: 'Radial', href: 'Radial WEB.html', icon: '🔘' },
             { id: 'random', name: 'Random Path', href: 'suncho perforacione y ramaño ajustable- WEB.html', icon: '🎲' }
