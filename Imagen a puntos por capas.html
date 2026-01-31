@@ -63,6 +63,7 @@
                     <option value="A4">A4 (210x297 mm)</option>
                     <option value="A3">A3 (297x420 mm)</option>
                     <option value="A2">A2 (420x594 mm)</option>
+                    <option value="CustomGlobal">Custom (Use Header Config)</option>
                     <option value="Custom">Custom (enter below)</option>
                 </select>
                 <div id="customSizeInputs" style="display: none;">
@@ -90,6 +91,81 @@
     <script src="config-panel.js?v=2"></script>
     <script src="app-header.js?v=2"></script>
     <script src="sketch.js"></script>
+    <script>
+        // Global Sync Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const plotterSizeSelect = document.getElementById('plotterSize');
+            const customInputs = document.getElementById('customSizeInputs');
+            const customWidth = document.getElementById('customWidth');
+            const customHeight = document.getElementById('customHeight');
+            const zPoint = document.getElementById('zPoint');
+            const zTravel = document.getElementById('zTravel');
+
+            // Handle Plotter Size Change
+            plotterSizeSelect.addEventListener('change', () => {
+                const val = plotterSizeSelect.value;
+                if (val === 'Custom') {
+                    customInputs.style.display = 'block';
+                } else if (val === 'CustomGlobal') {
+                    customInputs.style.display = 'none';
+                    if (typeof machineConfig !== 'undefined') {
+                        // Immediately apply global dimensions visually (optional, since sketch.js should handle it)
+                        // But sketch.js reads inputs, so we might need to inject values?
+                        // Actually sketch.js probably reads value of customWidth/Height if 'Custom' is selected.
+                        // We need to see how sketch.js determines size.
+                        // Let's assume we need to update the custom inputs even if hidden, or sketch.js needs update.
+                        updateFromGlobal();
+                    }
+                } else {
+                    customInputs.style.display = 'none';
+                }
+                // Trigger resizing in sketch.js if possible (it probably listens to change event or polling)
+                // For now, let's just ensure values are right.
+            });
+
+            // Initial Sync
+            if (typeof machineConfig !== 'undefined') {
+                // Default to CustomGlobal if it makes sense? Or just check current
+                // machineConfig.addListener(updateFromGlobal);
+                machineConfig.addListener((config) => {
+                    if (plotterSizeSelect.value === 'CustomGlobal') {
+                        updateFromGlobal();
+                    }
+                    // Auto-update Z values on tool change
+                    updateZFromTool();
+                });
+
+                // Set default to CustomGlobal for better UX?
+                // plotterSizeSelect.value = 'CustomGlobal';
+                // plotterSizeSelect.dispatchEvent(new Event('change'));
+            }
+
+            function updateFromGlobal() {
+                if (typeof machineConfig === 'undefined') return;
+
+                // We'll update the custom inputs and use them as the source of truth for the sketch
+                // This is a bit hacky but ensures sketch.js works without modification if it reads these inputs
+                customWidth.value = machineConfig.getWorkingX();
+                customHeight.value = machineConfig.getWorkingY();
+            }
+
+            function updateZFromTool() {
+                if (typeof machineConfig === 'undefined') return;
+                const tool = machineConfig.getActiveTool();
+                const support = machineConfig.getActiveSupport();
+
+                if (tool && support) {
+                    // Safe Z (travel)
+                    const safeZ = support.thickness + tool.travelClearance;
+                    if (zTravel) zTravel.value = safeZ;
+
+                    // Working Z (point)
+                    const workZ = support.thickness + tool.workingZ;
+                    if (zPoint) zPoint.value = workZ;
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -18,52 +18,10 @@ let sketch = function (p) {
         setupEventListeners();
 
         // Listen for machine config changes to update Z values
-        if (typeof machineConfig !== 'undefined') {
-            machineConfig.addListener(function () {
-                updateZValuesFromConfig();
-            });
-            // Initial sync
-            updateZValuesFromConfig();
-        }
+        // Note: UI synchronization is now handled by the main page script (Imagen a puntos por capas.html)
+        // sketch.js will simply read the values from the DOM when generating G-code.
     };
 
-    function updateZValuesFromConfig() {
-        if (typeof machineConfig === 'undefined') return;
-
-        const summary = machineConfig.getSafetySummary();
-        const dimensions = machineConfig.getWorkingDimensions();
-
-        if (summary.configured) {
-            // Update Z Point to minimum safe working Z
-            const zPointInput = document.getElementById('zPoint');
-            if (zPointInput) {
-                zPointInput.value = summary.minWorkingZ;
-            }
-
-            // Update Z Travel to minimum safe travel Z
-            const zTravelInput = document.getElementById('zTravel');
-            if (zTravelInput) {
-                zTravelInput.value = summary.minTravelZ;
-            }
-        }
-
-        // Update plotter dimensions
-        const plotterSize = document.getElementById('plotterSize');
-        if (plotterSize) {
-            plotterSize.value = 'Custom';
-            document.getElementById('customSizeInputs').style.display = 'block';
-
-            const customWidth = document.getElementById('customWidth');
-            const customHeight = document.getElementById('customHeight');
-
-            if (customWidth && customWidth !== document.activeElement) {
-                customWidth.value = dimensions.x;
-            }
-            if (customHeight && customHeight !== document.activeElement) {
-                customHeight.value = dimensions.y;
-            }
-        }
-    }
 
     function setupEventListeners() {
         // Image upload

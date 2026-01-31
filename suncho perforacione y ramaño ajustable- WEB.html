@@ -462,6 +462,41 @@
             document.getElementById('yMax')?.addEventListener('change', (e) => {
                 machineConfig.setWorkingY(e.target.value);
             });
+
+            // Listen for Tool changes to update Z values
+            let lastToolId = machineConfig.getActiveTool()?.id;
+
+            machineConfig.addListener(() => {
+                const currentTool = machineConfig.getActiveTool();
+                const currentSupport = machineConfig.getActiveSupport();
+
+                if (currentTool && currentTool.id !== lastToolId) {
+                    lastToolId = currentTool.id;
+
+                    const baseZ = currentSupport ? currentSupport.thickness : 0;
+                    const workZ = baseZ + currentTool.workingZ;
+                    const travelZ = baseZ + currentTool.travelClearance;
+
+                    // Update inputs
+                    const zTravelInput = document.getElementById('zTravelHeight');
+                    const z1Input = document.getElementById('zValue1');
+                    const z2Input = document.getElementById('zValue2');
+                    const z3Input = document.getElementById('zValue3');
+
+                    if (zTravelInput) zTravelInput.value = travelZ;
+                    if (z1Input) z1Input.value = workZ;
+                    if (z2Input) z2Input.value = workZ; // For random path, maybe flat Z is better default
+                    if (z3Input) z3Input.value = workZ;
+
+                    // Highlight change
+                    [zTravelInput, z1Input, z2Input, z3Input].forEach(el => {
+                        if (el) {
+                            el.style.backgroundColor = '#e6fffa';
+                            setTimeout(() => el.style.backgroundColor = '', 1000);
+                        }
+                    });
+                }
+            });
         }
 
         // Load any saved presets when page loads

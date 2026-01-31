@@ -247,12 +247,48 @@
                         machineConfig.setWorkingX(inputs.max_x.value);
                     });
                 }
-                if (inputs.max_y) {
-                    inputs.max_y.addEventListener('change', () => {
-                        machineConfig.setWorkingY(inputs.max_y.value);
+                inputs.max_y.addEventListener('change', () => {
+                    machineConfig.setWorkingY(inputs.max_y.value);
+                });
+            }
+
+            // Check for Tool changes to update Z values
+            let lastToolId = machineConfig.getActiveTool()?.id;
+
+            machineConfig.addListener((config) => {
+                const currentTool = machineConfig.getActiveTool();
+                const currentSupport = machineConfig.getActiveSupport();
+
+                if (currentTool && currentTool.id !== lastToolId) {
+                    lastToolId = currentTool.id;
+
+                    // Update Z values based on tool
+                    // Base Z = Support Thickness
+                    // Working Z = Base + Tool Working Z
+                    // Travel Z = Base + Tool Travel Clearance
+
+                    const baseZ = currentSupport ? currentSupport.thickness : 0;
+                    const workZ = baseZ + currentTool.workingZ;
+                    const travelZ = baseZ + currentTool.travelClearance;
+
+                    // Update inputs
+                    inputs.travel_z.value = travelZ;
+                    inputs.z1.value = workZ;
+                    inputs.z2.value = workZ + 1; // Example variation
+                    inputs.z3.value = workZ + 2;
+                    inputs.z4.value = workZ + 3;
+
+                    // Highlight change
+                    ['travel_z', 'z1', 'z2', 'z3', 'z4'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.style.backgroundColor = '#e6fffa';
+                            setTimeout(() => el.style.backgroundColor = '', 1000);
+                        }
                     });
                 }
-            }
+            });
+        }
 
             function validateInputs() {
                 try {
@@ -509,12 +545,12 @@
 
             // --- 5. Attach Event Listeners ---
             generateButton.addEventListener('click', () => generate());
-            copyButton.addEventListener('click', () => copyToClipboard());
+        copyButton.addEventListener('click', () => copyToClipboard());
 
-            // --- 6. Initial Setup ---
-            loadDefaults();
-            // Run generate once on load to show the default preview
-            generate();
+        // --- 6. Initial Setup ---
+        loadDefaults();
+        // Run generate once on load to show the default preview
+        generate();
 
         }); // End of DOMContentLoaded
     </script>
