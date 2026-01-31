@@ -33,15 +33,22 @@ class AppHeader {
 
     getCurrentPage() {
         const path = window.location.pathname;
-        const filename = path.split('/').pop() || 'index.html';
+        let filename = path.split('/').pop();
+
+        // Handle root path or empty filename
+        if (!filename || filename === '') {
+            filename = 'index.html';
+        }
+
+        const decodedFilename = decodeURIComponent(filename);
+        const normalizedFilename = decodedFilename.toLowerCase();
 
         for (const item of this.navItems) {
-            if (filename === item.href ||
-                (filename === '' && item.id === 'home') ||
-                (filename === '/' && item.id === 'home')) {
+            if (normalizedFilename === item.href.toLowerCase()) {
                 return item.id;
             }
         }
+
         return 'home';
     }
 
