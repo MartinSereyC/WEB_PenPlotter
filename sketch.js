@@ -5,6 +5,8 @@ let sketch = function (p) {
     let img = null;
     let processedLayers = [];
     let gcodeFiles = [];
+    let plotWidth = 210;  // Store plotter dimensions
+    let plotHeight = 297;
 
     p.setup = function () {
         let canvasDiv = document.getElementById('p5Canvas');
@@ -40,11 +42,12 @@ let sketch = function (p) {
         // Plotter size change
         document.getElementById('plotterSize').addEventListener('change', function (e) {
             let customInputs = document.getElementById('customSizeInputs');
-            if (e.target.value === 'Custom') {
+            if (e.target.value === 'Custom' || e.target.value === 'CustomGlobal') {
                 customInputs.style.display = 'block';
             } else {
                 customInputs.style.display = 'none';
             }
+            p.redraw(); // Redraw on size change
         });
 
         // Generate G-Code button
@@ -102,15 +105,9 @@ let sketch = function (p) {
     };
 
     function drawPointOverlay(offsetX, offsetY, displayWidth, displayHeight) {
-        let gridSize = parseInt(document.getElementById('gridSize').value) || 4;
+        if (!processedLayers || processedLayers.length === 0) return;
+
         let numLayers = parseInt(document.getElementById('numLayers').value) || 4;
-
-        // Calculate scale factors
-        let scaleX = displayWidth / img.width;
-        let scaleY = displayHeight / img.height;
-
-        p.loadPixels();
-        img.loadPixels();
 
         for (let layer = 0; layer < processedLayers.length; layer++) {
             let points = processedLayers[layer];
@@ -120,8 +117,10 @@ let sketch = function (p) {
             p.noStroke();
 
             for (let point of points) {
-                let screenX = offsetX + point.x * scaleX;
-                let screenY = offsetY + point.y * scaleY;
+                // Map mm coordinates back to screen pixels
+                // (point.x / plotWidth) gives the normalized position (0-1)
+                let screenX = offsetX + (point.x / plotWidth) * displayWidth;
+                let screenY = offsetY + (point.y / plotHeight) * displayHeight;
                 p.ellipse(screenX, screenY, 3, 3);
             }
         }

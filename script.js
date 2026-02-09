@@ -11,6 +11,8 @@ const PLOT_SIZES = {
     'A2_landscape': { width: 594, height: 420 }
 };
 
+const CANVAS_SQUARE_SIZE = 600;
+
 // State variables
 let canvas, ctx;
 let originalImage = null;
@@ -21,23 +23,24 @@ let imageOffsetY = 0;
 let initialScale = 1.0;
 let initialOffsetX = 0;
 let initialOffsetY = 0;
-let currentPlotSize = 'A4_portrait';
+let currentPlotSize = 'CustomGlobal';
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
     initializeCanvas();
     setupEventListeners();
-    setupEventListeners();
 
     // Listen for global config changes
     if (typeof machineConfig !== 'undefined') {
         machineConfig.addListener(() => {
-            if (currentPlotSize === 'custom') {
+            // Update inputs if Global is selected
+            if (currentPlotSize === 'CustomGlobal') {
+                updateCustomInputsVisibility(); // This will sync values
+
                 if (originalImage) {
                     calculateInitialTransform();
                     redrawCanvas();
                 } else {
-                    // Just redraw placeholder/border if no image
                     redrawCanvas();
                 }
             }
@@ -63,10 +66,45 @@ function initializeCanvas() {
 
 function resizeCanvas() {
     const container = canvas.parentElement;
-    if (container) {
-        canvas.width = container.offsetWidth || 800;
-        canvas.height = Math.max(600, window.innerHeight * 0.6);
+    if (!container) return;
+
+    // Use a fixed square size for the visual area
+    canvas.width = CANVAS_SQUARE_SIZE;
+    canvas.height = CANVAS_SQUARE_SIZE;
+
+    // Ensure it doesn't overflow container width visually
+    const parentWidth = container.offsetWidth - 40;
+    if (parentWidth < CANVAS_SQUARE_SIZE) {
+        canvas.style.width = parentWidth + 'px';
+        canvas.style.height = parentWidth + 'px';
+    } else {
+        canvas.style.width = CANVAS_SQUARE_SIZE + 'px';
+        canvas.style.height = CANVAS_SQUARE_SIZE + 'px';
     }
+}
+
+function getPlotVisualRect() {
+    const plotSize = getPlotDimensions(currentPlotSize);
+    const margin = 20;
+    const availableSize = CANVAS_SQUARE_SIZE - margin * 2;
+
+    const plotAspect = plotSize.width / plotSize.height;
+
+    let visualWidth, visualHeight;
+    if (plotAspect > 1) { // Landscape
+        visualWidth = availableSize;
+        visualHeight = visualWidth / plotAspect;
+    } else { // Portrait
+        visualHeight = availableSize;
+        visualWidth = visualHeight * plotAspect;
+    }
+
+    return {
+        x: (CANVAS_SQUARE_SIZE - visualWidth) / 2,
+        y: (CANVAS_SQUARE_SIZE - visualHeight) / 2,
+        width: visualWidth,
+        height: visualHeight
+    };
 }
 
 function setupEventListeners() {
@@ -78,9 +116,34 @@ function setupEventListeners() {
 
     // Plot size selection
     const plotSize = document.getElementById('plotSize');
+    const customInputs = document.getElementById('customSizeInputs');
+    const customWidth = document.getElementById('customWidth');
+    const customHeight = document.getElementById('customHeight');
+
     if (plotSize) {
-        plotSize.addEventListener('change', handlePlotSizeChange);
+        plotSize.addEventListener('change', (e) => {
+            handlePlotSizeChange(e);
+            updateCustomInputsVisibility();
+        });
+        // Initialize
         currentPlotSize = plotSize.value;
+        updateCustomInputsVisibility();
+    }
+
+    // Custom inputs listeners
+    if (customWidth && customHeight) {
+        const updateCustom = () => {
+            if (currentPlotSize === 'Custom') {
+                if (originalImage) {
+                    calculateInitialTransform();
+                    redrawCanvas();
+                } else {
+                    redrawCanvas();
+                }
+            }
+        };
+        customWidth.addEventListener('input', updateCustom);
+        customHeight.addEventListener('input', updateCustom);
     }
 
     // Zoom controls
@@ -153,66 +216,78 @@ function handlePlotSizeChange(event) {
 }
 
 function getPlotDimensions(sizeKey) {
-    if (sizeKey === 'custom') {
+    if (sizeKey === 'CustomGlobal') {
         if (typeof machineConfig !== 'undefined') {
             return {
                 width: machineConfig.getWorkingX(),
                 height: machineConfig.getWorkingY()
             };
         } else {
-            return { width: 100, height: 100 }; // Fallback
+            return { width: 210, height: 297 }; // Fallback A4
         }
+    } else if (sizeKey === 'Custom') {
+        const w = parseFloat(document.getElementById('customWidth')?.value) || 100;
+        const h = parseFloat(document.getElementById('customHeight')?.value) || 100;
+        return { width: w, height: h };
     }
     return PLOT_SIZES[sizeKey];
+}
+
+function updateCustomInputsVisibility() {
+    const plotSize = document.getElementById('plotSize');
+    const customInputs = document.getElementById('customSizeInputs');
+    const customWidth = document.getElementById('customWidth');
+    const customHeight = document.getElementById('customHeight');
+
+    if (!plotSize || !customInputs) return;
+
+    const val = plotSize.value;
+    if (val === 'CustomGlobal') {
+        customInputs.style.display = 'block';
+        if (customWidth) customWidth.disabled = true;
+        if (customHeight) customHeight.disabled = true;
+        // Sync values for display
+        if (typeof machineConfig !== 'undefined') {
+            if (customWidth) customWidth.value = machineConfig.getWorkingX();
+            if (customHeight) customHeight.value = machineConfig.getWorkingY();
+        }
+    } else if (val === 'Custom') {
+        customInputs.style.display = 'block';
+        if (customWidth) customWidth.disabled = false;
+        if (customHeight) customHeight.disabled = false;
+    } else {
+        customInputs.style.display = 'none';
+    }
 }
 
 function calculateInitialTransform() {
     if (!originalImage || !canvas) return;
 
-    const plotSize = getPlotDimensions(currentPlotSize);
-    if (!plotSize) return;
+    const visualPlot = getPlotVisualRect();
 
-    // Calculate scale to fit image within plot area
-    // Convert mm to pixels (assuming 96 DPI: 1mm ≈ 3.7795 pixels)
-    const mmToPx = 3.7795;
-    const plotWidthPx = plotSize.width * mmToPx;
-    const plotHeightPx = plotSize.height * mmToPx;
-
-    // Calculate available canvas space (leave some margin)
-    const margin = 40;
-    const availableWidth = canvas.width - margin * 2;
-    const availableHeight = canvas.height - margin * 2;
-
-    // Calculate scale to fit plot area within canvas
-    const scaleX = availableWidth / plotWidthPx;
-    const scaleY = availableHeight / plotHeightPx;
-    const plotScale = Math.min(scaleX, scaleY);
-
-    // Calculate scale to fit image within plot area
+    // Calculate initial scale to fit image within the visual plotter rectangle
     const imgAspect = originalImage.width / originalImage.height;
-    const plotAspect = plotSize.width / plotSize.height;
+    const plotAspect = visualPlot.width / visualPlot.height;
 
-    let imageScaleX, imageScaleY;
     if (imgAspect > plotAspect) {
         // Image is wider - fit to width
-        imageScaleX = plotWidthPx / originalImage.width;
-        imageScaleY = imageScaleX;
+        imageScale = visualPlot.width / originalImage.width;
     } else {
         // Image is taller - fit to height
-        imageScaleY = plotHeightPx / originalImage.height;
-        imageScaleX = imageScaleY;
+        imageScale = visualPlot.height / originalImage.height;
     }
 
-    initialScale = imageScaleX * plotScale;
-    imageScale = initialScale;
+    initialScale = imageScale;
 
-    // Center image
+    // Center image relative to visualPlot
     const scaledWidth = originalImage.width * imageScale;
     const scaledHeight = originalImage.height * imageScale;
-    initialOffsetX = (canvas.width - scaledWidth) / 2;
-    initialOffsetY = (canvas.height - scaledHeight) / 2;
-    imageOffsetX = initialOffsetX;
-    imageOffsetY = initialOffsetY;
+
+    imageOffsetX = visualPlot.x + (visualPlot.width - scaledWidth) / 2;
+    imageOffsetY = visualPlot.y + (visualPlot.height - scaledHeight) / 2;
+
+    initialOffsetX = imageOffsetX;
+    initialOffsetY = imageOffsetY;
 }
 
 function adjustZoom(factor) {
@@ -256,71 +331,46 @@ function resetImageTransform() {
 function redrawCanvas() {
     if (!canvas || !ctx) return;
 
-    // Clear canvas
-    ctx.fillStyle = '#F5F5F5';
+    // 1. Clear entire square canvas with light gray
+    ctx.fillStyle = '#E0E0E0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. Calculate and draw the "Working Area" (Dark Gray)
+    const visualPlot = getPlotVisualRect();
+    ctx.fillStyle = '#444444';
+    ctx.fillRect(visualPlot.x, visualPlot.y, visualPlot.width, visualPlot.height);
 
     if (!currentImage) {
         drawPlaceholder();
         return;
     }
 
-    // Draw plot area border (white box)
-    const plotSize = getPlotDimensions(currentPlotSize);
-    if (plotSize) {
-        const mmToPx = 3.7795;
-        const plotWidthPx = plotSize.width * mmToPx;
-        const plotHeightPx = plotSize.height * mmToPx;
-
-        // Calculate plot area position (centered)
-        const plotX = (canvas.width - plotWidthPx) / 2;
-        const plotY = (canvas.height - plotHeightPx) / 2;
-
-        // Draw white background for plot area
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(plotX, plotY, plotWidthPx, plotHeightPx);
-
-        // Draw border
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(plotX, plotY, plotWidthPx, plotHeightPx);
-    }
-
-    // Draw image
+    // 3. Draw image clipped to the dark gray area
     const scaledWidth = currentImage.width * imageScale;
     const scaledHeight = currentImage.height * imageScale;
 
     ctx.save();
-
-    // Create clipping region for plot area
-    if (plotSize) {
-        const mmToPx = 3.7795;
-        const plotWidthPx = plotSize.width * mmToPx;
-        const plotHeightPx = plotSize.height * mmToPx;
-        const plotX = (canvas.width - plotWidthPx) / 2;
-        const plotY = (canvas.height - plotHeightPx) / 2;
-
-        ctx.beginPath();
-        ctx.rect(plotX, plotY, plotWidthPx, plotHeightPx);
-        ctx.clip();
-    }
+    ctx.beginPath();
+    ctx.rect(visualPlot.x, visualPlot.y, visualPlot.width, visualPlot.height);
+    ctx.clip();
 
     ctx.drawImage(currentImage, imageOffsetX, imageOffsetY, scaledWidth, scaledHeight);
-
     ctx.restore();
 }
 
 function drawPlaceholder() {
     if (!canvas || !ctx) return;
 
-    ctx.fillStyle = '#F5F5F5';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    const visualPlot = getPlotVisualRect();
     ctx.fillStyle = '#999999';
-    ctx.font = '24px Arial';
+    ctx.font = '16px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Sube una imagen para comenzar', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Sube una imagen para comenzar', visualPlot.x + visualPlot.width / 2, visualPlot.y + visualPlot.height / 2);
+
+    const plotSize = getPlotDimensions(currentPlotSize);
+    ctx.font = '12px Arial';
+    ctx.fillText(`${plotSize.width}x${plotSize.height}mm`, visualPlot.x + visualPlot.width / 2, visualPlot.y + visualPlot.height / 2 + 30);
 }
 
 function downloadProcessedImage() {
@@ -329,41 +379,43 @@ function downloadProcessedImage() {
         return;
     }
 
-    // Create a temporary canvas for the cropped image
     const plotSize = getPlotDimensions(currentPlotSize);
-    if (!plotSize) return;
+    const visualPlot = getPlotVisualRect();
 
-    const mmToPx = 3.7795;
-    const plotWidthPx = plotSize.width * mmToPx;
-    const plotHeightPx = plotSize.height * mmToPx;
+    // Final output resolution (mm to pixels)
+    const exportScale = 10;
+    const plotWidthPx = plotSize.width * exportScale;
+    const plotHeightPx = plotSize.height * exportScale;
 
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = plotWidthPx;
     tempCanvas.height = plotHeightPx;
     const tempCtx = tempCanvas.getContext('2d');
 
-    // Fill with white background
+    // Background white
     tempCtx.fillStyle = '#FFFFFF';
     tempCtx.fillRect(0, 0, plotWidthPx, plotHeightPx);
 
-    // Calculate source region from original image
-    const plotX = (canvas.width - plotWidthPx) / 2;
-    const plotY = (canvas.height - plotHeightPx) / 2;
+    // Calculate scaling from visual "Working Area" to absolute exported pixels
+    const visualToExport = plotWidthPx / visualPlot.width;
 
-    // Calculate what part of the image is visible in the plot area
-    const sourceX = Math.max(0, (plotX - imageOffsetX) / imageScale);
-    const sourceY = Math.max(0, (plotY - imageOffsetY) / imageScale);
-    const sourceWidth = Math.min(currentImage.width - sourceX, plotWidthPx / imageScale);
-    const sourceHeight = Math.min(currentImage.height - sourceY, plotHeightPx / imageScale);
+    // Adjust offsets relative to the visualPlot top-left
+    const localOffsetX = (imageOffsetX - visualPlot.x) * visualToExport;
+    const localOffsetY = (imageOffsetY - visualPlot.y) * visualToExport;
+    const exportImageWidth = (currentImage.width * imageScale) * visualToExport;
+    const exportImageHeight = (currentImage.height * imageScale) * visualToExport;
 
-    // Draw the visible portion
-    if (sourceWidth > 0 && sourceHeight > 0) {
-        tempCtx.drawImage(
-            currentImage,
-            sourceX, sourceY, sourceWidth, sourceHeight,
-            0, 0, plotWidthPx, plotHeightPx
-        );
-    }
+    // Draw the image
+    tempCtx.save();
+    tempCtx.beginPath();
+    tempCtx.rect(0, 0, plotWidthPx, plotHeightPx);
+    tempCtx.clip();
+
+    tempCtx.drawImage(
+        currentImage,
+        localOffsetX, localOffsetY, exportImageWidth, exportImageHeight
+    );
+    tempCtx.restore();
 
     // Download
     tempCanvas.toBlob(function (blob) {

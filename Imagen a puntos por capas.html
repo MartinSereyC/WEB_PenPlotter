@@ -63,8 +63,8 @@
                     <option value="A4">A4 (210x297 mm)</option>
                     <option value="A3">A3 (297x420 mm)</option>
                     <option value="A2">A2 (420x594 mm)</option>
-                    <option value="CustomGlobal">Custom (Use Header Config)</option>
-                    <option value="Custom">Custom (enter below)</option>
+                    <option value="CustomGlobal" selected>From Header Config</option>
+                    <option value="Custom">Custom (Manual Override)</option>
                 </select>
                 <div id="customSizeInputs" style="display: none;">
                     <label for="customWidth">Width (mm):</label>
@@ -104,29 +104,26 @@
             // Handle Plotter Size Change
             plotterSizeSelect.addEventListener('change', () => {
                 const val = plotterSizeSelect.value;
-                if (val === 'Custom') {
+                if (val === 'CustomGlobal') {
                     customInputs.style.display = 'block';
-                } else if (val === 'CustomGlobal') {
-                    customInputs.style.display = 'none';
+                    customWidth.disabled = true;
+                    customHeight.disabled = true;
                     if (typeof machineConfig !== 'undefined') {
-                        // Immediately apply global dimensions visually (optional, since sketch.js should handle it)
-                        // But sketch.js reads inputs, so we might need to inject values?
-                        // Actually sketch.js probably reads value of customWidth/Height if 'Custom' is selected.
-                        // We need to see how sketch.js determines size.
-                        // Let's assume we need to update the custom inputs even if hidden, or sketch.js needs update.
                         updateFromGlobal();
                     }
+                } else if (val === 'Custom') {
+                    customInputs.style.display = 'block';
+                    customWidth.disabled = false;
+                    customHeight.disabled = false;
                 } else {
                     customInputs.style.display = 'none';
+                    customWidth.disabled = false;
+                    customHeight.disabled = false;
                 }
-                // Trigger resizing in sketch.js if possible (it probably listens to change event or polling)
-                // For now, let's just ensure values are right.
             });
 
             // Initial Sync
             if (typeof machineConfig !== 'undefined') {
-                // Default to CustomGlobal if it makes sense? Or just check current
-                // machineConfig.addListener(updateFromGlobal);
                 machineConfig.addListener((config) => {
                     if (plotterSizeSelect.value === 'CustomGlobal') {
                         updateFromGlobal();
@@ -135,18 +132,28 @@
                     updateZFromTool();
                 });
 
-                // Set default to CustomGlobal for better UX?
-                // plotterSizeSelect.value = 'CustomGlobal';
-                // plotterSizeSelect.dispatchEvent(new Event('change'));
+                // Set default to CustomGlobal
+                // This will trigger the change event if we dispatch it, or we call the handler manually
+                if (plotterSizeSelect.value === 'CustomGlobal') {
+                    // Ensure UI state is correct on load
+                    customInputs.style.display = 'block';
+                    customWidth.disabled = true;
+                    customHeight.disabled = true;
+                    updateFromGlobal();
+                }
+
+                // Check if we should initialize Z values
+                updateZFromTool();
             }
 
             function updateFromGlobal() {
                 if (typeof machineConfig === 'undefined') return;
 
-                // We'll update the custom inputs and use them as the source of truth for the sketch
-                // This is a bit hacky but ensures sketch.js works without modification if it reads these inputs
-                customWidth.value = machineConfig.getWorkingX();
-                customHeight.value = machineConfig.getWorkingY();
+                // Only update if we are in global mode
+                if (plotterSizeSelect.value === 'CustomGlobal') {
+                    customWidth.value = machineConfig.getWorkingX();
+                    customHeight.value = machineConfig.getWorkingY();
+                }
             }
 
             function updateZFromTool() {
@@ -157,11 +164,11 @@
                 if (tool && support) {
                     // Safe Z (travel)
                     const safeZ = support.thickness + tool.travelClearance;
-                    if (zTravel) zTravel.value = safeZ;
+                    if (zTravel && document.activeElement !== zTravel) zTravel.value = safeZ;
 
                     // Working Z (point)
                     const workZ = support.thickness + tool.workingZ;
-                    if (zPoint) zPoint.value = workZ;
+                    if (zPoint && document.activeElement !== zPoint) zPoint.value = workZ;
                 }
             }
         });

@@ -29,8 +29,16 @@
                     <option value="A3_landscape">A3 Horizontal (420 x 297 mm)</option>
                     <option value="A2_portrait">A2 Vertical (420 x 594 mm)</option>
                     <option value="A2_landscape">A2 Horizontal (594 x 420 mm)</option>
-                    <option value="custom">Custom (Use Header Config)</option>
+                    <option value="CustomGlobal" selected>From Header Config</option>
+                    <option value="Custom">Custom (Manual Override)</option>
                 </select>
+                <div id="customSizeInputs" style="display: none; margin-top: 10px;">
+                    <label for="customWidth" style="display:inline; margin-right:5px;">W:</label>
+                    <input type="number" id="customWidth" value="210" min="1" style="width: 70px;">
+                    <label for="customHeight" style="display:inline; margin-left:10px; margin-right:5px;">H:</label>
+                    <input type="number" id="customHeight" value="297" min="1" style="width: 70px;">
+                    <span>mm</span>
+                </div>
             </div>
 
             <div class="control-group">
@@ -73,10 +81,10 @@
         </p>
     </div>
 
-    <script src="machine-config.js"></script>
-    <script src="config-panel.js"></script>
-    <script src="app-header.js"></script>
-    <script src="script.js"></script>
+    <script src="machine-config.js?v=3"></script>
+    <script src="config-panel.js?v=3"></script>
+    <script src="app-header.js?v=3"></script>
+    <script src="script.js?v=3"></script>
 </body>
 
 </html>
